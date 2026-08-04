@@ -4,6 +4,8 @@ Không đưa trực tiếp app Streamlit/BGE-M3/ChromaDB vào Vercel Function. V
 được dùng làm landing page; chatbot chạy trên Streamlit Community Cloud và được
 nhúng bằng `?embed=true`.
 
+URL production hiện tại: [https://2a2026shopee-policy-rag.streamlit.app/](https://2a2026shopee-policy-rag.streamlit.app/)
+
 ## 1. Deploy chatbot lên Streamlit Community Cloud
 
 1. Push repository lên GitHub, mở Streamlit Community Cloud và chọn **Create app**.

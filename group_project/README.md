@@ -149,10 +149,16 @@ flowchart TD
 | HyDE | Hoàn thành | Sinh hypothetical document rồi ghép với query gốc để giảm lệch văn phong giữa câu hỏi hội thoại và văn bản chính sách. |
 | Conversation memory | Hoàn thành | Supervisor dùng các lượt chat gần nhất để giải nghĩa follow-up nhưng giới hạn lịch sử nhằm tránh phình prompt. |
 | UI source, score, highlight | Hoàn thành | Hiển thị nguồn, dense similarity/lexical rank và highlight evidence khớp query; HTML tài liệu được escape trước khi thêm `<mark>`. |
-| Deploy online | Sẵn sàng deploy | Có Streamlit Secrets và landing page Vercel trong `deployment/`; cần chủ repository bấm deploy để có URL công khai. |
+| Deploy online | Hoàn thành | [Streamlit chatbot public](https://2a2026shopee-policy-rag.streamlit.app/); landing page Vercel đã được cấu hình để nhúng URL này. |
 
-Bốn tiêu chí kỹ thuật tương ứng **16/20 điểm bonus đã có bằng chứng trong repo**;
-4 điểm deploy chỉ được tính sau khi tạo và nộp URL công khai.
+Cả năm tiêu chí tương ứng **20/20 điểm bonus đã có bằng chứng trong repo và URL demo công khai**.
+
+### Demo Online
+
+- **URL:** [https://2a2026shopee-policy-rag.streamlit.app/](https://2a2026shopee-policy-rag.streamlit.app/)
+- **Cách chấm nhanh:** đặt một câu hỏi chính sách, mở “Chi Tiết Tài Liệu &
+  Trích Dẫn” để xem citation, source, dense similarity, lexical rank và evidence
+  highlight; tiếp tục bằng một follow-up để kiểm tra conversation memory.
 
 ### Kết quả RAGAS A/B (19 câu)
 

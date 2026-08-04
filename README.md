@@ -602,6 +602,12 @@ python -m group_project.evaluation.eval_pipeline
 Deploy theo [`deployment/README.md`](deployment/README.md): Streamlit Community
 Cloud chạy chatbot, Vercel cung cấp landing page nhúng app.
 
+### Demo Online
+
+- **Streamlit chatbot:** [https://2a2026shopee-policy-rag.streamlit.app/](https://2a2026shopee-policy-rag.streamlit.app/)
+- Demo gồm hybrid RAG, citation, source score, evidence highlight, conversation
+  memory, BM25/TF-IDF và PageIndex fallback.
+
 ---
 
 ### Lưu ý
