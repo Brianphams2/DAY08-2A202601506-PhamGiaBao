@@ -22,14 +22,20 @@ có field "deprecation" cảnh báo) và trả kết quả trong "retrieved_node
 (json.dumps(...)) trước khi viết logic parse, đừng đoán schema từ ví dụ code cũ.
 """
 
+from __future__ import annotations
+
+import json
 import os
+import time
 from pathlib import Path
+from typing import Any
 from dotenv import load_dotenv
 
 load_dotenv()
 
 PAGEINDEX_API_KEY = os.getenv("PAGEINDEX_API_KEY", "")
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
+TEMP_PDF_DIR = Path(__file__).parent.parent / "data" / "temp_pdf"
 
 
 def to_unsigned_vietnamese(text: str) -> str:
@@ -60,6 +66,9 @@ def to_unsigned_vietnamese(text: str) -> str:
 def upload_documents():
     """
     Upload toàn bộ markdown documents lên PageIndex.
+
+    Returns:
+        Danh sách doc_ids đã được upload thành công.
     """
     if not PAGEINDEX_API_KEY:
         raise RuntimeError("PAGEINDEX_API_KEY not set")
@@ -199,3 +208,4 @@ if __name__ == "__main__":
         results = pageindex_search("danh sách sản phẩm cấm đăng bán", top_k=3)
         for r in results:
             print(f"[{r['score']:.3f}] {r['content'][:100]}...")
+
