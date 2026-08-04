@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "change-payment-method",
+  "url": "https://help.shopee.vn/portal/4/article/79555?seo=1",
+  "canonical_url": "https://help.shopee.vn/portal/4/article/79555",
+  "title": "[Thành viên mới] Tôi có thể thay đổi phương thức thanh toán cho đơn hàng không?",
+  "platform": "Shopee Vietnam",
+  "category": "payment",
+  "source_type": "support_article",
+  "customer_role": "buyer",
+  "language": "vi",
+  "crawled_at": "2026-08-04T12:15:46.996020+07:00",
+  "source_last_updated": null,
+  "year": 2026,
+  "http_status": 200,
+  "crawl_method": "http_ssr_htmlparser",
+  "word_count": 160,
+  "content_sha256": "4e80e8d45e170d6824a2b3476566eb1bfff4ff071e23f828e3e502c3ff33011f",
+  "content_markdown": "# [Thành viên mới] Tôi có thể thay đổi phương thức thanh toán cho đơn hàng không?\n\nBạn có thể thay đổi phương thức thanh toán cho đơn hàng thỏa điều kiện sau:\n\n- Trả trước bằng thẻ tín dụng/ ghi nợ/ thẻ ATM nội địa/ Ví ShopeePay/ Thanh toán QR/ Ứng dụng ngân hàng/ Apple Pay/ Google Pay\n\n- Chưa hoàn tất thanh toán 100% (đơn hàng đang ở mục Tôi > Chờ xác nhận)\n\n- Sản phẩm trong đơn hàng KHÔNG thuộc mục Nạp thẻ & Dịch vụ\n\nXem Hướng dẫn đổi phương thức thanh toán\n⚠️ Lưu ý:\nNếu đơn hàng của bạn không hiển thị trong mục Chờ xác nhận điều này có nghĩa là đơn hàng của bạn đã được xử lý thanh toán thành công với phương thức thanh toán đã chọn trước đó. Lúc này, vui lòng kiểm tra thông tin đơn hàng tại các mục trạng thái đơn hàng liên quan khác."
+}

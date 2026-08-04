@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "delivery-estimate",
+  "url": "https://help.shopee.vn/portal/4/article/79573?seo=1",
+  "canonical_url": "https://help.shopee.vn/portal/4/article/79573",
+  "title": "[Đơn hàng] Làm cách nào để tôi kiểm tra được Phí vận chuyển và Thời gian giao hàng dự kiến?",
+  "platform": "Shopee Vietnam",
+  "category": "shipping",
+  "source_type": "support_article",
+  "customer_role": "buyer",
+  "language": "vi",
+  "crawled_at": "2026-08-04T12:16:08.357434+07:00",
+  "source_last_updated": null,
+  "year": 2026,
+  "http_status": 200,
+  "crawl_method": "http_ssr_htmlparser",
+  "word_count": 285,
+  "content_sha256": "d40d78883e752f06561c400d6f8030bdae8f40a3530be0034bf3df37f2280a72",
+  "content_markdown": "# [Đơn hàng] Làm cách nào để tôi kiểm tra được Phí vận chuyển và Thời gian giao hàng dự kiến?\n\nBạn có thể kiểm tra Phí vận chuyển và Thời gian giao hàng dự kiến của đơn hàng bằng một trong 03 cách sau:\nCách 1: Xem thông tin sản phẩm trên trang kết quả tìm kiếm sản phẩm\nTrên trang kết quả tìm kiếm sản phẩm, bạn có thể tham khảo thời gian giao hàng dự kiến của từng sản phẩm tương ứng với địa chỉ Người bán.\n\n⚠️ Lưu ý:\n\n- Hiện tại, thời gian giao hàng dự kiến chỉ hiển thị đối với một (số) sản phẩm nhất định có Thời gian giao hàng ổn định theo tiêu chí Shopee.\n\n- Để tham khảo thời gian giao hàng chính xác nhất tương ứng với từng hình thức vận chuyển, bạn có thể truy cập mục Phương thức vận chuyển trên trang Thanh toán.\nCách 2: Xem tại trang thông tin sản phẩm, mục Phí vận chuyển\nChọn mục Phí vận chuyển để kiểm tra mức phí vận chuyển và thời gian giao hàng dự kiến tương ứng với từng lựa chọn phương thức vận chuyển khả dụng.\n\nCách 3: Xem tại trang Thanh toán của đơn hàng\nTrên trang Thanh toán đơn hàng, thời gian giao hàng dự kiến và phí vận chuyển của từng nhóm sản phẩm thuộc cùng một Shop sẽ được hiển thị tại mục Phương thức vận chuyển tương ứng với Shop bán nhóm sản phẩm đó.\nBạn có thể xem Tổng tiền phí vận chuyển tại phần cuối của trang thanh toán đơn hàng.\n\nXem thêm:\nCác Câu Hỏi Thường Gặp Về Mua Hàng Trên Shope"
+}

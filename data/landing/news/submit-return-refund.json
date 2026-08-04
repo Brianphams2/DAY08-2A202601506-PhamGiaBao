@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "submit-return-refund",
+  "url": "https://help.shopee.vn/portal/4/article/79233?seo=1",
+  "canonical_url": "https://help.shopee.vn/portal/4/article/79233",
+  "title": "[Trả hàng/ Hoàn tiền] Hướng dẫn gửi yêu cầu Trả hàng/ Hoàn tiền",
+  "platform": "Shopee Vietnam",
+  "category": "return_refund",
+  "source_type": "support_article",
+  "customer_role": "buyer",
+  "language": "vi",
+  "crawled_at": "2026-08-04T12:15:49.934121+07:00",
+  "source_last_updated": null,
+  "year": 2026,
+  "http_status": 200,
+  "crawl_method": "http_ssr_htmlparser",
+  "word_count": 509,
+  "content_sha256": "258a0926fa80253f22b18e0629f1bc56a63c078b646490f696d2b7dbbc7fdfb5",
+  "content_markdown": "# [Trả hàng/ Hoàn tiền] Hướng dẫn gửi yêu cầu Trả hàng/ Hoàn tiền\n\n## 1. Hướng dẫn gửi yêu cầu Trả hàng/Hoàn tiền\nKhi cần yêu cầu trả hàng hoặc hoàn tiền trên Shopee, bạn có thể thực hiện theo một trong hai cách sau.\n\nCách 1: Gửi yêu cầu trực tiếp tại trang đơn hàng\n- Bước 1: Mở ứng dụng Shopee, vào mục Tôi > chọn thẻ Chờ giao hàng/Đã giao\n\n- Bước 2: Tại đơn hàng bạn cần xử lý, bấm Trả hàng/Hoàn tiền.\n\n- Bước 3: Chọn tình huống bạn đang gặp\n\n-\n- \"Tôi đã nhận hàng nhưng hàng có vấn đề (bể vỡ, sai mẫu, hàng lỗi, khác mô tả,...) - Miễn ship hoàn về \": Dành cho trường hợp sản phẩm bị lỗi, thiếu, hoặc không đúng mô tả.\n\n-\n- \"Tôi chưa nhận hàng/nhận thiếu hàng\": Dành cho trường hợp bạn chưa nhận được hàng hoặc bị thiếu sản phẩm trong đơn.\n\n- Bước 4: Chọn sản phẩm cần khiếu nại (trong trường hợp đơn hàng chỉ có 1 sản phẩm, bạn không cần chọn ở bước này)\n\n- Bước 5: Chọn lý do khiếu nại\n\n- Bước 6: Chọn phương án trả hàng/ hoàn tiền (nếu bạn chọn lý do khiếu nại Thiếu hàng)\n\n- Bước 7: Điền các thông tin cần thiết vào biểu mẫu, bao gồm:\n\n-\n- Chú thích thêm tình trạng hàng hóa tại mục Mô tả.\n\n- Bằng chứng thể hiện tình trạng sản phẩm (hình ảnh sản phẩm, video mở hộp,...)\n\n- Email liên hệ.\n\n- Bước 8: Chọn Gửi yêu cầu để hoàn tất\n\n3caad65c7fb64bfb884d71933efc0dad.mov\nCách 2: Gửi yêu cầu tại mục Trò Chuyện Với Shopee\n- Bước 1: Tại trang chủ Shopee, vào mục Tôi > chọn Trò Chuyện Với Shopee.\n\n- Bước 2: Chọn Khiếu nại trả hàng hoàn tiền.\n\n- Bước 3: Chọn đơn hàng bạn cần gửi yêu cầu.\n\n- Bước 4: Xác nhận và gửi yêu cầu\n\n-\n- Xác nhận bạn Đã nhận hoặc Chưa nhận hàng.\n\n- Chọn lý do gửi yêu cầu.\n\n- Tải lên bằng chứng (ảnh/video).\n\n- Nhấn Gửi yêu cầu.\n\n2. Lưu ý\n\n| Thời gian xử lý\n| Yêu cầu của bạn thường được xử lý trong khoảng 3 - 5 ngày làm việc.\n\n| Kết quả xử lý\n| Shopee sẽ thông báo kết quả qua mục Thông báo > Cập nhật đơn hàng và/hoặc Email của bạn.\n\n| Thời gian hoàn tiền\n| Nếu yêu cầu được chấp nhận, tiền sẽ được hoàn trong 1 - 14 ngày làm việc, tùy thuộc vào phương thức thanh toán. Để tìm hiểu thêm về thời gian hoàn tiền theo từng phương thức, vui lòng truy cập [Trả hàng/Hoàn tiền] Thời gian nhận tiền hoàn và cách kiểm tra tiền hoàn\n\n| Trường hợp Trả lại & Hoàn tiền\n| Bạn cần trả lại sản phẩm bằng cách yêu cầu bưu tá đến lấy hoặc tự ra bưu cục gửi. Sản phẩm sẽ được Người bán/Shopee xem xét khi nhận lại."
+}

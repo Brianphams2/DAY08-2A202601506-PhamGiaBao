@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "late-delivery",
+  "url": "https://help.shopee.vn/portal/4/article/79530?seo=1",
+  "canonical_url": "https://help.shopee.vn/portal/4/article/79530",
+  "title": "[Đơn hàng] Đã quá thời gian dự kiến giao hàng nhưng tôi chưa nhận được hàng",
+  "platform": "Shopee Vietnam",
+  "category": "order_tracking",
+  "source_type": "support_article",
+  "customer_role": "buyer",
+  "language": "vi",
+  "crawled_at": "2026-08-04T12:16:04.499336+07:00",
+  "source_last_updated": null,
+  "year": 2026,
+  "http_status": 200,
+  "crawl_method": "http_ssr_htmlparser",
+  "word_count": 183,
+  "content_sha256": "d178d3b37fc069a40d39c96b0a7eebe7bfb044744a927d2801ecf51715053296",
+  "content_markdown": "# [Đơn hàng] Đã quá thời gian dự kiến giao hàng nhưng tôi chưa nhận được hàng\n\nNếu đã quá thời gian giao hàng dự kiến mà vẫn chưa nhận được hàng, bạn có thể:\n\n1. Liên hệ với đơn vị vận chuyển để kiểm tra tình trạng đơn hàng\n\n2. Gửi yêu cầu trả hàng/hoàn tiền trên hệ thống Shopee (chỉ đối với đơn đã thanh toán nhưng chưa nhận được hàng)\nĐể gửi yêu cầu Trả hàng/Hoàn tiền trên hệ thống Shopee cho các đơn hàng đã thanh toán trước nhưng chưa nhận được hàng trên Ứng dụng Shopee, bạn vui lòng thực hiện các bước sau:\nBước 1: Chọn mục Tôi từ trên Ứng dụng Shopee > Đang giao > chọn đơn hàng chưa nhận được\n\nBước 2: Chọn Trả hàng/Hoàn tiền > chọn Lý do trả hàng/hoàn tiền là Chưa nhận được hàng và cung cấp thêm các thông tin liên quan khác > Hoàn thành>\nNgười bán/Shopee sẽ kiểm tra và phản hồi yêu cầu trả hàng/hoàn tiền của bạn trong vòng 3-5 ngày làm việc (dự kiến)."
+}
