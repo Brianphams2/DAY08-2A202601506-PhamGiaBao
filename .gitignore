@@ -8,6 +8,7 @@ venv/
 
 # Env (keys)
 .env
+.streamlit/secrets.toml
 
 # Temp PDF conversion cache
 data/_tmp_pdf/
@@ -15,8 +16,10 @@ data/_tmp_pdf/
 # Temp / cache
 .pytest_cache/
 *.tmp
+tmp/
 pageindex_doc_ids.json
 pageindex_pdfs/
+group_project/evaluation/evaluation_cache/
 
 # IDE
 .vscode/

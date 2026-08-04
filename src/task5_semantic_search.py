@@ -14,6 +14,7 @@ from functools import lru_cache
 
 from dotenv import load_dotenv
 
+from .llm_config import extract_chat_content, get_llm_provider
 from .task4_chunking_indexing import (
     EMBEDDING_DIM,
     EMBEDDING_MODEL,
@@ -35,8 +36,6 @@ load_dotenv()
 # van phong do keo cosine similarity xuong thap hon do lien quan thuc te.
 # HyDE cho LLM sinh mot doan tra loi GIA DINH theo dung van phong tai lieu roi
 # embed doan do, nen vector truy van roi vao dung vung khong gian cua corpus.
-HYDE_MODEL = os.getenv("HYDE_MODEL", "openai/gpt-4o-mini")
-HYDE_BASE_URL = "https://openrouter.ai/api/v1"
 HYDE_MAX_TOKENS = 220
 HYDE_TEMPERATURE = 0.3
 HYDE_TIMEOUT = 30.0
@@ -183,15 +182,6 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
 # HyDE
 # =============================================================================
 
-def _get_llm_api_key() -> str:
-    """Lay API key that; tra chuoi rong neu .env con la placeholder."""
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
-    api_key = api_key.strip()
-    if "..." in api_key:  # vd placeholder 'sk-or-v1-...' trong .env.example
-        return ""
-    return api_key
-
-
 @lru_cache(maxsize=HYDE_CACHE_SIZE)
 def generate_hypothetical_document(query: str) -> str:
     """
@@ -205,21 +195,25 @@ def generate_hypothetical_document(query: str) -> str:
     Ket qua duoc cache theo query: RAGAS eval chay lai nhieu lan tren cung bo
     golden dataset se khong dot them quota OpenRouter.
     """
-    api_key = _get_llm_api_key()
-    if not api_key:
+    try:
+        provider = get_llm_provider(model_override=os.getenv("HYDE_MODEL") or None)
+    except RuntimeError:
         return ""
 
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key, base_url=HYDE_BASE_URL, timeout=HYDE_TIMEOUT)
+        client_kwargs = {"api_key": provider.api_key, "timeout": HYDE_TIMEOUT}
+        if provider.base_url:
+            client_kwargs["base_url"] = provider.base_url
+        client = OpenAI(**client_kwargs)
         response = client.chat.completions.create(
-            model=HYDE_MODEL,
+            model=provider.model,
             messages=[{"role": "user", "content": HYDE_PROMPT.format(query=query)}],
             temperature=HYDE_TEMPERATURE,
             max_tokens=HYDE_MAX_TOKENS,
         )
-        return (response.choices[0].message.content or "").strip()
+        return extract_chat_content(response)
     except Exception as exc:  # rate limit, mat mang, model id sai, ...
         print(f"  [HyDE] LLM khong dung duoc, dung semantic search thuong: {exc}")
         return ""

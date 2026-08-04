@@ -1,17 +1,154 @@
 [
   {
-    "question": "Người mua có thể yêu cầu trả hàng/hoàn tiền trong thời hạn bao lâu sau khi nhận hàng?",
-    "expected_answer": "Trong vòng 15 ngày kể từ khi giao hàng thành công (24 giờ đối với thực phẩm tươi sống/đông lạnh).",
-    "expected_context": "Trang Returns and Refunds Policy, mục Return/Refund Eligibility"
+    "id": "payment_methods",
+    "category": "payment",
+    "question": "Shopee Việt Nam hỗ trợ những phương thức thanh toán nào?",
+    "expected_answer": "Các phương thức được liệt kê gồm Ví ShopeePay, thẻ tín dụng/ghi nợ, trả góp bằng thẻ tín dụng, thanh toán QR, ứng dụng ngân hàng, thẻ nội địa NAPAS, Apple Pay, Google Pay, thanh toán khi nhận hàng (COD) và SPayLater.",
+    "expected_context": "Danh sách các hình thức thanh toán đang được Shopee Việt Nam hỗ trợ.",
+    "expected_source": "news/payment-methods.md"
   },
   {
-    "question": "Shopee hỗ trợ những phương thức thanh toán nào?",
-    "expected_answer": "ShopeePay Wallet, thẻ tín dụng/ghi nợ, trả góp qua thẻ, QR Code, chuyển khoản qua app ngân hàng, thẻ NAPAS, Apple Pay, Google Pay, và COD.",
-    "expected_context": "Trang Payment Methods Overview"
+    "id": "apple_google_pay_limits",
+    "category": "payment",
+    "question": "Giới hạn giá trị đơn hàng khi thanh toán bằng Apple Pay và Google Pay trên Shopee là bao nhiêu?",
+    "expected_answer": "Apple Pay áp dụng cho đơn hàng từ 10.000 VNĐ đến 25.000.000 VNĐ; Google Pay áp dụng từ 10.000 VNĐ đến 120.000.000 VNĐ.",
+    "expected_context": "Các mục Apple Pay và Google Pay nêu giới hạn giá trị thanh toán cuối cùng.",
+    "expected_source": "news/payment-methods.md"
   },
   {
-    "question": "Người bán không được đăng bán những sản phẩm nào?",
-    "expected_answer": "Hàng giả/nhái, sản phẩm bất hợp pháp, vi phạm sở hữu trí tuệ, và các mặt hàng nằm trong danh sách cấm của sàn.",
-    "expected_context": "Trang Product Listing Regulations, mục Prohibited Content"
+    "id": "change_payment_method",
+    "category": "payment",
+    "question": "Khi nào người mua có thể đổi phương thức thanh toán cho đơn hàng Shopee?",
+    "expected_answer": "Đơn phải dùng một phương thức trả trước được hỗ trợ, chưa thanh toán đủ 100% và còn ở mục Tôi > Chờ xác nhận; sản phẩm cũng không được thuộc nhóm Nạp thẻ & Dịch vụ.",
+    "expected_context": "Ba điều kiện để thay đổi phương thức thanh toán của đơn hàng.",
+    "expected_source": "news/change-payment-method.md"
+  },
+  {
+    "id": "delivery_estimate_locations",
+    "category": "shipping",
+    "question": "Có thể kiểm tra phí vận chuyển và thời gian giao hàng dự kiến ở đâu trên Shopee?",
+    "expected_answer": "Có thể kiểm tra trên trang kết quả tìm kiếm sản phẩm, tại mục Phí vận chuyển của trang thông tin sản phẩm, hoặc tại mục Phương thức vận chuyển trên trang Thanh toán.",
+    "expected_context": "Ba vị trí Shopee cho phép xem phí vận chuyển và thời gian giao dự kiến.",
+    "expected_source": "news/delivery-estimate.md"
+  },
+  {
+    "id": "late_delivery",
+    "category": "shipping",
+    "question": "Đơn đã quá thời gian dự kiến nhưng chưa giao thì người mua nên làm gì?",
+    "expected_answer": "Người mua có thể liên hệ đơn vị vận chuyển; nếu đơn đã thanh toán nhưng chưa nhận được hàng thì gửi yêu cầu Trả hàng/Hoàn tiền với lý do Chưa nhận được hàng. Người bán hoặc Shopee dự kiến phản hồi trong 3-5 ngày làm việc.",
+    "expected_context": "Hướng xử lý đơn quá thời gian giao dự kiến và thời gian phản hồi.",
+    "expected_source": "news/late-delivery.md"
+  },
+  {
+    "id": "international_channels",
+    "category": "cross_border",
+    "question": "Đơn hàng quốc tế trên Shopee đi qua những kênh vận chuyển nào và ai giao khi về Việt Nam?",
+    "expected_answer": "Đơn quốc tế đi qua Express International hoặc Standard International; khi về đến Việt Nam, đơn được SPX vận chuyển.",
+    "expected_context": "Hai kênh vận chuyển quốc tế và đơn vị giao chặng nội địa.",
+    "expected_source": "news/international-shipping.md"
+  },
+  {
+    "id": "international_eta",
+    "category": "cross_border",
+    "question": "Đơn hàng quốc tế trên Shopee thường mất bao lâu để giao?",
+    "expected_answer": "Thông thường từ 7 đến 15 ngày; một số đơn có thể lâu hơn do thời tiết hoặc thủ tục thông quan.",
+    "expected_context": "Thời gian giao hàng quốc tế thông thường và các nguyên nhân có thể kéo dài.",
+    "expected_source": "news/international-shipping.md"
+  },
+  {
+    "id": "submit_refund_request",
+    "category": "return_refund",
+    "question": "Người mua cần cung cấp những thông tin gì khi gửi yêu cầu Trả hàng/Hoàn tiền tại trang đơn hàng?",
+    "expected_answer": "Người mua cần chọn tình huống, sản phẩm và lý do khiếu nại, chọn phương án xử lý nếu áp dụng, rồi điền mô tả tình trạng, tải bằng chứng ảnh hoặc video và cung cấp email liên hệ trước khi gửi yêu cầu.",
+    "expected_context": "Các bước và trường thông tin trong biểu mẫu Trả hàng/Hoàn tiền.",
+    "expected_source": "news/submit-return-refund.md"
+  },
+  {
+    "id": "refund_review_time",
+    "category": "return_refund",
+    "question": "Yêu cầu Trả hàng/Hoàn tiền ở trạng thái Shopee đang xem xét được xử lý trong bao lâu?",
+    "expected_answer": "Shopee dự kiến gửi kết quả trong 3-5 ngày làm việc, không tính Chủ nhật và các ngày lễ, Tết, qua Thông báo > Cập nhật đơn hàng hoặc email.",
+    "expected_context": "Thời gian và kênh thông báo kết quả khi Shopee xem xét yêu cầu.",
+    "expected_source": "news/refund-process.md"
+  },
+  {
+    "id": "return_deadline_after_approval",
+    "category": "return_refund",
+    "question": "Sau khi Shopee chấp nhận phương án Trả hàng & Hoàn tiền, người mua có bao lâu để gửi trả hàng?",
+    "expected_answer": "Người mua phải chọn hình thức trả hàng và hoàn tất gửi trả về kho Shopee hoặc người bán trong vòng 6 ngày kể từ khi nhận thông báo gửi trả hàng.",
+    "expected_context": "Thời hạn hoàn tất gửi trả sau khi phương án Trả hàng & Hoàn tiền được chấp nhận.",
+    "expected_source": "news/refund-process.md"
+  },
+  {
+    "id": "no_delivery_evidence",
+    "category": "refund_evidence",
+    "question": "Nếu chưa nhận được hàng thì người mua có phải nộp bằng chứng cho yêu cầu hoàn tiền không?",
+    "expected_answer": "Không. Shopee tự động xử lý yêu cầu dựa trên hệ thống theo dõi đơn hàng.",
+    "expected_context": "Quy định bằng chứng cho trường hợp chưa nhận được hàng.",
+    "expected_source": "news/refund-evidence.md"
+  },
+  {
+    "id": "unboxing_video",
+    "category": "refund_evidence",
+    "question": "Video mở kiện dùng làm bằng chứng khi hàng có vấn đề cần đáp ứng điều kiện gì?",
+    "expected_answer": "Video phải quay liên tục, không cắt ghép, góc quay rõ và chất lượng tốt; cần thể hiện 6 mặt kiện hàng, mã vận đơn khớp đơn, quá trình mở kiện và số lượng, tình trạng, niêm phong hoặc tem nhãn của sản phẩm.",
+    "expected_context": "Các tiêu chí của video mở kiện cho khiếu nại hàng bể vỡ, sai mẫu, lỗi hoặc khác mô tả.",
+    "expected_source": "news/refund-evidence.md"
+  },
+  {
+    "id": "refund_credit_card_time",
+    "category": "refund_status",
+    "question": "Tiền hoàn cho đơn thanh toán bằng thẻ tín dụng hoặc ghi nợ mất bao lâu và được hoàn về đâu?",
+    "expected_answer": "Tiền được hoàn về đúng thẻ tín dụng hoặc ghi nợ đã dùng để thanh toán trong 7-14 ngày làm việc, tùy ngân hàng.",
+    "expected_context": "Kênh nhận và thời gian hoàn tiền cho thẻ tín dụng/ghi nợ.",
+    "expected_source": "news/refund-time.md"
+  },
+  {
+    "id": "refund_napas_time",
+    "category": "refund_status",
+    "question": "Tiền hoàn cho đơn thanh toán bằng thẻ nội địa NAPAS mất bao lâu?",
+    "expected_answer": "Tiền được hoàn về thẻ nội địa NAPAS trong 2-5 ngày làm việc, tùy ngân hàng.",
+    "expected_context": "Thời gian hoàn tiền cho thẻ nội địa NAPAS.",
+    "expected_source": "news/refund-time.md"
+  },
+  {
+    "id": "return_shipping_options",
+    "category": "return_refund",
+    "question": "Shopee có những hình thức gửi hàng hoàn trả nào và hình thức nào miễn phí?",
+    "expected_answer": "Có ba hình thức: đơn vị vận chuyển đến lấy hàng, trả hàng tại bưu cục và tự sắp xếp. Hai hình thức đầu miễn phí; với tự sắp xếp, người mua trả phí trước rồi được Shopee xem xét hỗ trợ hoàn phí.",
+    "expected_context": "Ba hình thức trả hàng và trách nhiệm thanh toán phí ban đầu.",
+    "expected_source": "news/return-shipping-methods.md"
+  },
+  {
+    "id": "self_arranged_return_support",
+    "category": "return_refund",
+    "question": "Đơn không thuộc Shopee Mall tự sắp xếp trả hàng được hỗ trợ phí như thế nào?",
+    "expected_answer": "Sau khi yêu cầu được chấp nhận và đủ điều kiện, phí được hoàn bằng Shopee Xu: 25.000 Xu nếu cùng tỉnh/thành phố với người bán và 40.000 Xu nếu khác tỉnh/thành phố.",
+    "expected_context": "Mức hỗ trợ phí trả hàng tự sắp xếp cho đơn không thuộc Shopee Mall.",
+    "expected_source": "news/return-shipping-methods.md"
+  },
+  {
+    "id": "personal_data_definition",
+    "category": "privacy",
+    "question": "Theo Chính sách bảo mật Shopee, dữ liệu cá nhân là gì và chính sách áp dụng cho ai?",
+    "expected_answer": "Dữ liệu cá nhân là dữ liệu về một cá nhân có thể dùng riêng hoặc kết hợp với thông tin khác để xác định danh tính, ví dụ tên, số chứng minh nhân dân và thông tin liên hệ. Chính sách áp dụng cho cả người bán và người mua, trừ khi có quy định rõ khác đi.",
+    "expected_context": "Định nghĩa Dữ Liệu Cá Nhân và phạm vi người dùng áp dụng.",
+    "expected_source": "legal/privacy-policy-shopee.md"
+  },
+  {
+    "id": "buyer_seller_contract",
+    "category": "terms_of_service",
+    "question": "Theo Điều khoản dịch vụ, hợp đồng mua bán trên Shopee được ký giữa ai và ai chịu trách nhiệm?",
+    "expected_answer": "Hợp đồng mua bán thực sự được ký trực tiếp giữa người mua và người bán; các bên giao dịch chịu trách nhiệm về hợp đồng, việc đăng bán, bảo hành và các nghĩa vụ tương tự.",
+    "expected_context": "Vai trò trung gian của Shopee và trách nhiệm của người mua, người bán đối với hợp đồng.",
+    "expected_source": "legal/terms-of-service-shopee.md"
+  },
+  {
+    "id": "prohibited_listing_content",
+    "category": "seller_policy",
+    "question": "Quy định đăng bán của Shopee nghiêm cấm những nhóm nội dung sản phẩm nào?",
+    "expected_answer": "Quy định cấm các nội dung phản động, khiêu dâm hoặc bạo lực; thông tin rác hay xúc phạm; nội dung cổ súy hành vi hoặc sản phẩm độc hại; văn hóa phẩm đồi trụy; bí mật; con người hoặc bộ phận cơ thể; động vật và chế phẩm từ động vật; nội dung phân biệt chủng tộc; nội dung vi phạm sở hữu trí tuệ; và sản phẩm thuộc danh sách cấm hoặc hạn chế của Shopee.",
+    "expected_context": "Mục Các nội dung không được phép đăng bán.",
+    "expected_source": "legal/product-listing-regulations-shopee.md"
   }
 ]

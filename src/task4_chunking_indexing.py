@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import threading
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -55,6 +56,10 @@ EMBEDDING_BATCH_SIZE = 8
 VECTOR_STORE = "chromadb"
 COLLECTION_NAME = "ecommerce_support_docs"
 CHROMA_WRITE_BATCH_SIZE = 128
+
+_CHROMA_LOCK = threading.RLock()
+_CHROMA_CLIENT: Any | None = None
+_CHROMA_COLLECTION: Any | None = None
 
 
 # =============================================================================
@@ -260,14 +265,18 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
 
 def _get_chroma_client() -> Any:
     """Tao local persistent Chroma client, tat anonymous telemetry."""
+    global _CHROMA_CLIENT
     import chromadb
     from chromadb.config import Settings
 
-    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(
-        path=str(CHROMA_DIR),
-        settings=Settings(anonymized_telemetry=False),
-    )
+    with _CHROMA_LOCK:
+        if _CHROMA_CLIENT is None:
+            CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+            _CHROMA_CLIENT = chromadb.PersistentClient(
+                path=str(CHROMA_DIR),
+                settings=Settings(anonymized_telemetry=False),
+            )
+        return _CHROMA_CLIENT
 
 
 def _collection_metadata() -> dict[str, str | int | bool | float]:
@@ -283,11 +292,15 @@ def _collection_metadata() -> dict[str, str | int | bool | float]:
 
 def get_collection() -> Any:
     """Lay collection cho Task 5; tao rong neu Task 4 chua index."""
-    client = _get_chroma_client()
-    return client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        metadata=_collection_metadata(),
-    )
+    global _CHROMA_COLLECTION
+    with _CHROMA_LOCK:
+        if _CHROMA_COLLECTION is None:
+            client = _get_chroma_client()
+            _CHROMA_COLLECTION = client.get_or_create_collection(
+                name=COLLECTION_NAME,
+                metadata=_collection_metadata(),
+            )
+        return _CHROMA_COLLECTION
 
 
 def index_to_vectorstore(chunks: list[dict]) -> Any:
@@ -297,6 +310,8 @@ def index_to_vectorstore(chunks: list[dict]) -> Any:
     Collection cu cung ten duoc xoa truoc khi index de khong con stale chunks
     khi corpus thay doi. Cac collection khac va file ngoai chroma_db khong bi tac dong.
     """
+    global _CHROMA_COLLECTION
+
     if not chunks:
         raise ValueError("Cannot index an empty chunk list")
 
@@ -323,26 +338,28 @@ def index_to_vectorstore(chunks: list[dict]) -> Any:
     if len(ids) != len(set(ids)):
         raise ValueError("Chunk IDs must be unique before indexing")
 
-    client = _get_chroma_client()
-    existing_names = {
-        item if isinstance(item, str) else item.name
-        for item in client.list_collections()
-    }
-    if COLLECTION_NAME in existing_names:
-        client.delete_collection(COLLECTION_NAME)
+    with _CHROMA_LOCK:
+        client = _get_chroma_client()
+        existing_names = {
+            item if isinstance(item, str) else item.name
+            for item in client.list_collections()
+        }
+        if COLLECTION_NAME in existing_names:
+            client.delete_collection(COLLECTION_NAME)
 
-    collection = client.create_collection(
-        name=COLLECTION_NAME,
-        metadata=_collection_metadata(),
-    )
-    for start in range(0, len(chunks), CHROMA_WRITE_BATCH_SIZE):
-        end = start + CHROMA_WRITE_BATCH_SIZE
-        collection.upsert(
-            ids=ids[start:end],
-            documents=documents[start:end],
-            embeddings=embeddings[start:end],
-            metadatas=metadatas[start:end],
+        collection = client.create_collection(
+            name=COLLECTION_NAME,
+            metadata=_collection_metadata(),
         )
+        for start in range(0, len(chunks), CHROMA_WRITE_BATCH_SIZE):
+            end = start + CHROMA_WRITE_BATCH_SIZE
+            collection.upsert(
+                ids=ids[start:end],
+                documents=documents[start:end],
+                embeddings=embeddings[start:end],
+                metadatas=metadatas[start:end],
+            )
+        _CHROMA_COLLECTION = collection
 
     indexed_count = collection.count()
     if indexed_count != len(chunks):

@@ -19,6 +19,11 @@ from .task4_chunking_indexing import chunk_documents, get_collection, load_docum
 BM25_K1 = 1.5
 BM25_B = 0.75
 _TOKEN_PATTERN = re.compile(r"[a-z0-9]+(?:['-][a-z0-9]+)*")
+_VI_STOPWORDS = {
+    "ai", "ban", "bi", "cac", "cho", "co", "cua", "dang", "de", "duoc",
+    "gi", "hien", "ho", "hoac", "la", "mot", "nao", "nguoi", "nhung",
+    "o", "shopee", "the", "thi", "tren", "trong", "tro", "va", "viet", "voi",
+}
 
 # Khoi tao lazy de import module nhanh va khong mo ChromaDB cho den query dau tien.
 CORPUS: list[dict] = []
@@ -32,8 +37,18 @@ def tokenize(text: str) -> list[str]:
 
     normalized = unicodedata.normalize("NFKD", text.casefold())
     without_marks = "".join(char for char in normalized if not unicodedata.combining(char))
-    without_marks = without_marks.replace("đ", "d")
-    return _TOKEN_PATTERN.findall(without_marks)
+    # NFKD does not decompose Vietnamese horn/stroke letters (ơ, ư, đ), so
+    # translate all remaining Vietnamese base letters explicitly.  Without this
+    # step ``phương thức`` became the meaningless tokens ``ph``, ``ng``, ``th``.
+    without_marks = without_marks.translate(str.maketrans({
+        "đ": "d", "ă": "a", "â": "a", "ê": "e", "ô": "o", "ơ": "o", "ư": "u",
+    }))
+    unigrams = [token for token in _TOKEN_PATTERN.findall(without_marks) if token not in _VI_STOPWORDS]
+    # Phrase bigrams make exact intents such as "thanh_toan", "tra_hang" and
+    # "hoan_tien" outrank long legal documents that merely contain the same
+    # individual words in unrelated sections.
+    bigrams = [f"{left}_{right}" for left, right in zip(unigrams, unigrams[1:])]
+    return [*unigrams, *bigrams]
 
 
 def _searchable_text(document: dict) -> str:

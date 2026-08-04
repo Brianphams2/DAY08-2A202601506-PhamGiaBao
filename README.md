@@ -530,10 +530,10 @@ run_dashboard()
 
 #### Deliverable Evaluation
 
-- [ ] File `group_project/evaluation/golden_dataset.json` — 15+ cặp Q&A
-- [ ] File `group_project/evaluation/eval_pipeline.py` — script chạy evaluation
-- [ ] File `group_project/evaluation/results.md` — bảng điểm + phân tích
-- [ ] So sánh A/B ít nhất 2 configs
+- [x] File `group_project/evaluation/golden_dataset.json` — 19 cặp Q&A
+- [x] File `group_project/evaluation/eval_pipeline.py` — RAGAS có cache/resume
+- [x] File `group_project/evaluation/results.md` — bảng điểm + worst performers
+- [x] So sánh A/B: hybrid + RRF với dense-only
 
 ---
 
@@ -549,20 +549,36 @@ run_dashboard()
 
 ### Kiến Trúc Hệ Thống
 
+```mermaid
+flowchart LR
+    Q["Question + chat history"] --> S["RAG Supervisor"]
+    S --> D["BGE-M3 + ChromaDB"]
+    S --> L["BM25 / TF-IDF"]
+    D --> R["RRF fusion"]
+    L --> R
+    R --> F{"Dense score < 0.48?"}
+    F -- "Yes" --> P["PageIndex fallback"]
+    F -- "No" --> O["Context reordering"]
+    P --> O
+    O --> G["OpenAI-compatible LLM"]
+    G --> U["Streamlit: citation, score, highlight"]
+    E["Golden dataset: 19 Q&A"] --> V["RAGAS: 4 metrics, A/B"]
 ```
-[Vẽ diagram kiến trúc ở đây]
-```
+
+Sơ đồ đầy đủ, lý do chọn từng thành phần, kết quả test và bảng bonus nằm trong
+[`group_project/README.md`](group_project/README.md).
 
 ---
 
 ### Phân Công Công Việc
 
-| Thành viên | MSSV | Nhiệm vụ | Trạng thái |
-|-----------|------|----------|------------|
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| Thành viên | MSSV | Vai trò / nhiệm vụ | Trạng thái |
+|-----------|------|-------------------|------------|
+| Phạm Gia Bảo | `2A202601506` | Role 1 — Team Leader & RAG Architect; supervisor, Task 9, tích hợp | Hoàn thành |
+| Nguyễn Ngọc Hiệp | `2A202601156` | Role 2 — Data & Retrieval; Task 1-5, ChromaDB, BGE-M3, HyDE | Hoàn thành |
+| Đoàn Tiến Thành | `2A202601222` | Role 3 — Frontend & Chatbot; Streamlit, Task 10, highlight, memory | Hoàn thành |
+| Phạm Nam Khánh | `2A202601718` | Role 4 — Evaluation & QA; golden dataset, RAGAS, tests | Hoàn thành |
+| Đinh Hồng Đăng | `2A202601480` | Role 5 — Sparse & Advanced RAG; BM25, TF-IDF, RRF, PageIndex | Hoàn thành |
 
 ---
 
@@ -572,11 +588,19 @@ run_dashboard()
 # Cài đặt dependencies
 pip install -r requirements.txt
 
+# Tạo .env và cấu hình một OpenAI-compatible LLM provider
+copy .env.example .env
+
 # Chạy app
 streamlit run app.py
-# hoặc
-chainlit run app.py
+
+# Chạy toàn bộ test và RAGAS A/B
+python -m unittest discover -s tests -v
+python -m group_project.evaluation.eval_pipeline
 ```
+
+Deploy theo [`deployment/README.md`](deployment/README.md): Streamlit Community
+Cloud chạy chatbot, Vercel cung cấp landing page nhúng app.
 
 ---
 

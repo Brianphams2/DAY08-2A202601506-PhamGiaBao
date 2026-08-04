@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trợ lý RAG trả lời chính sách thương mại điện tử có trích dẫn nguồn.">
+  <title>Shopee Policy Assistant</title>
+  <style>
+    :root { color-scheme: light; --orange:#ee4d2d; --ink:#241f1d; --paper:#fffaf7; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font:16px/1.5 Inter,system-ui,sans-serif; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem clamp(1rem,4vw,4rem); border-bottom:1px solid #f1d9cf; background:#fff; }
+    .brand { font-weight:800; letter-spacing:-.02em; }
+    .brand span { color:var(--orange); }
+    .tag { margin:0; color:#76645d; font-size:.9rem; }
+    main { height:calc(100vh - 73px); padding:clamp(.5rem,1.5vw,1.25rem); }
+    iframe { width:100%; height:100%; border:1px solid #efd8cf; border-radius:18px; background:#fff; box-shadow:0 16px 50px rgba(83,42,25,.10); }
+    #setup { display:none; place-items:center; height:100%; text-align:center; padding:2rem; }
+    #setup div { max-width:680px; }
+    code { color:var(--orange); background:#fff0eb; padding:.15rem .35rem; border-radius:.35rem; }
+    @media (max-width:640px) { .tag { display:none; } main { height:calc(100vh - 65px); padding:0; } iframe { border:0; border-radius:0; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span>Shopee</span> Policy Assistant</div>
+    <p class="tag">Hybrid RAG · citations · evidence highlight</p>
+  </header>
+  <main>
+    <section id="setup">
+      <div>
+        <h1>Chưa cấu hình Streamlit URL</h1>
+        <p>Thay <code>YOUR-APP</code> trong file <code>index.html</code> bằng subdomain Streamlit Community Cloud rồi deploy lại Vercel.</p>
+      </div>
+    </section>
+    <iframe id="chatbot" title="Shopee Policy RAG Chatbot" loading="eager" allow="clipboard-write"></iframe>
+  </main>
+  <script>
+    const streamlitUrl = "https://YOUR-APP.streamlit.app/?embed=true";
+    const frame = document.getElementById("chatbot");
+    const setup = document.getElementById("setup");
+    if (streamlitUrl.includes("YOUR-APP")) {
+      frame.style.display = "none";
+      setup.style.display = "grid";
+    } else {
+      frame.src = streamlitUrl;
+    }
+  </script>
+</body>
+</html>

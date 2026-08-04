@@ -14,7 +14,28 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
-# Tải cấu hình môi trường
+# Streamlit Community Cloud stores secrets in ``st.secrets`` instead of a
+# local .env file.  Copy only the known keys into the process environment
+# before backend modules read their configuration.
+for secret_name in (
+    "LLM_PROVIDER",
+    "LLM_API_KEY",
+    "LLM_BASE_URL",
+    "LLM_MODEL",
+    "HYDE_MODEL",
+    "RAGAS_JUDGE_MODEL",
+    "PAGEINDEX_API_KEY",
+    "OPENROUTER_API_KEY",
+    "OPENAI_API_KEY",
+):
+    try:
+        secret_value = st.secrets.get(secret_name)
+    except FileNotFoundError:
+        secret_value = None
+    if secret_value and not os.getenv(secret_name):
+        os.environ[secret_name] = str(secret_value)
+
+# Tải cấu hình môi trường local sau secrets; biến đã có không bị ghi đè.
 load_dotenv()
 
 # Thêm project root vào sys.path để import các task từ src/
@@ -22,28 +43,20 @@ PROJECT_ROOT = Path(__file__).parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.llm_config import llm_is_configured
+
 # =============================================================================
 # KIỂM TRA HỆ THỐNG BACKEND & THIẾT LẬP MOCKUP FALLBACK
 # =============================================================================
 
 try:
-    from src.task9_retrieval_pipeline import retrieve
-    from src.task10_generation import (
-        reorder_for_llm, 
-        format_context, 
-        LLM_MODEL, 
-        SYSTEM_PROMPT, 
-        TEMPERATURE, 
-        TOP_P
-    )
+    from src.supervisor import PipelineConfig, RAGSupervisor
+    from src.ui_highlighting import highlight_evidence
     HAS_BACKEND = True
+    BACKEND_ERROR = ""
 except Exception as e:
     HAS_BACKEND = False
-    # Mockup metadata và prompt cho chế độ độc lập/fallback
-    LLM_MODEL = "mock-model"
-    SYSTEM_PROMPT = ""
-    TEMPERATURE = 0.3
-    TOP_P = 0.9
+    BACKEND_ERROR = str(e)
 
 # Dữ liệu mockup phục vụ chạy thử nghiệm khi chưa có API Key hoặc chạy độc lập
 MOCK_DOCUMENTS = {
@@ -158,62 +171,83 @@ def get_mock_response(query: str, use_reordering: bool = True):
 # RAG EXECUTION PIPELINE
 # =============================================================================
 
-def run_rag_pipeline(query: str, top_k: int = 5, use_reordering: bool = True):
-    """Chạy toàn bộ pipeline RAG: Retrieval -> (Reorder) -> Generation."""
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    
-    # Tự động dùng Mockup nếu không có API key hoặc thiếu thư viện backend
-    if not HAS_BACKEND or not api_key:
-        return get_mock_response(query, use_reordering)
+def run_rag_pipeline(
+    query: str,
+    top_k: int = 5,
+    use_reordering: bool = True,
+    use_hyde: bool = False,
+    lexical_method: str = "bm25",
+    conversation_history: list[dict] | None = None,
+):
+    """Chạy đúng một pipeline dùng chung: Supervisor -> Task 9 -> Task 10."""
+    if not HAS_BACKEND:
+        return {
+            "answer": f"Backend chưa sẵn sàng: {BACKEND_ERROR}",
+            "sources": [],
+            "retrieval_source": "error",
+        }
+    if not llm_is_configured():
+        return {
+            "answer": "Chưa cấu hình LLM provider trong .env.",
+            "sources": [],
+            "retrieval_source": "error",
+        }
 
     try:
-        # Bước 1: Gọi hàm retrieve từ Task 9 (Semantic + Lexical + RRF Rerank)
-        chunks = retrieve(query, top_k=top_k)
-        
-        if not chunks:
-            return {
-                "answer": "Không tìm thấy tài liệu phù hợp trong hệ thống dữ liệu.",
-                "sources": [],
-                "reordered_sources": [],
-                "retrieval_source": "none"
-            }
-
-        # Bước 2: Reorder tài liệu để tránh "Lost in the Middle" (nếu được kích hoạt)
-        if use_reordering:
-            processed_chunks = reorder_for_llm(chunks)
-        else:
-            processed_chunks = chunks
-            
-        # Bước 3: Định dạng context
-        context = format_context(processed_chunks)
-        
-        # Bước 4: Tạo Prompt và gửi đến LLM qua OpenRouter
-        user_message = f"Context:\n{context}\n\n---\n\nQuestion: {query}"
-        
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
-        
-        response = client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=TEMPERATURE,
-            top_p=TOP_P,
+        config = PipelineConfig(
+            top_k=top_k,
+            use_reordering=use_reordering,
+            use_hyde=use_hyde,
+            lexical_method=lexical_method,
         )
-        answer = response.choices[0].message.content
-        
-        return {
-            "answer": answer,
-            "sources": chunks,  # Giữ danh sách gốc theo độ tương đồng để so sánh
-            "reordered_sources": processed_chunks,
-            "retrieval_source": chunks[0].get("source", "hybrid") if chunks else "none"
-        }
+        return RAGSupervisor(config).answer(query, history=conversation_history)
     except Exception as e:
-        # Dự phòng khẩn cấp nếu API gặp lỗi kết nối hoặc quota
-        st.warning(f"Chuyển sang chế độ chạy thử nghiệm (Mockup Mode) do phát sinh lỗi: {e}")
-        return get_mock_response(query, use_reordering)
+        return {
+            "answer": f"Không thể hoàn tất truy vấn: {e}",
+            "sources": [],
+            "retrieval_source": "error",
+        }
+
+
+def _source_score_label(source: dict, fallback_rank: int) -> str:
+    """Format method-aware retrieval diagnostics without calling RRF confidence."""
+    dense_score = source.get("dense_score")
+    if isinstance(dense_score, (int, float)):
+        return f"Dense similarity: `{dense_score:.4f}`"
+    if source.get("source") == "pageindex":
+        return f"PageIndex rank: `#{source.get('final_rank', fallback_rank)}`"
+    if source.get("lexical_rank") is not None:
+        method = str(source.get("lexical_method", "lexical")).upper()
+        return f"Dense similarity: `N/A ({method}-only)`"
+    return "Dense similarity: `N/A (not recorded)`"
+
+
+def _render_sources(sources: list[dict], query: str, *, expanded: bool = False) -> None:
+    """Render cited chunks with safe query-term evidence highlighting."""
+    with st.expander("📚 Chi Tiết Tài Liệu & Trích Dẫn", expanded=expanded):
+        for idx, source in enumerate(sources, 1):
+            metadata = source.get("metadata", {})
+            title = metadata.get("title") or metadata.get("source") or "Tài liệu"
+            doc_type = metadata.get("type", "unknown")
+            year = metadata.get("year", "2026")
+            score_label = _source_score_label(source, idx)
+            lexical_rank = source.get("lexical_rank")
+            lexical_label = ""
+            if isinstance(lexical_rank, int):
+                method = str(source.get("lexical_method", "lexical")).upper()
+                lexical_label = f" | {method} rank: `#{lexical_rank}`"
+
+            st.markdown(f"**[{idx}] {title} ({year})**")
+            st.caption(
+                f"Loại: `{doc_type}` | {score_label}{lexical_label} | "
+                f"File: `{metadata.get('source', '')}`"
+            )
+            highlighted = highlight_evidence(str(source.get("content", "")), query)
+            st.markdown(
+                f'<div class="evidence-snippet">{highlighted}</div>',
+                unsafe_allow_html=True,
+            )
+            st.divider()
 
 
 
@@ -256,6 +290,21 @@ st.markdown("""
         font-weight: 600 !important;
         color: #1e293b !important;
     }
+    .evidence-snippet {
+        padding: 0.8rem 0.95rem;
+        border-left: 3px solid rgba(59, 130, 246, 0.65);
+        border-radius: 0 8px 8px 0;
+        background: rgba(148, 163, 184, 0.10);
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+    }
+    .evidence-highlight {
+        padding: 0.08rem 0.18rem;
+        border-radius: 4px;
+        background: rgba(250, 204, 21, 0.42);
+        color: inherit;
+        font-weight: 600;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -296,12 +345,23 @@ with st.sidebar:
     # 2. Các thiết lập tham số
     st.subheader("⚙️ Cấu hình Siêu Tham Số")
     top_k = st.slider("Số lượng tài liệu lấy ra (top_k)", min_value=3, max_value=10, value=5)
+    lexical_method = st.selectbox(
+        "Lexical search strategy",
+        options=("bm25", "tfidf"),
+        format_func=lambda value: "BM25 (mặc định)" if value == "bm25" else "TF-IDF (bonus)",
+        help="BM25 dùng term saturation; TF-IDF là strategy bonus để so sánh lexical ranking.",
+    )
     
     # Switch bật tắt Document Reordering
     use_reordering = st.toggle(
         "Kích hoạt Document Reordering",
         value=True,
         help="Sắp xếp lại các đoạn văn theo cấu trúc xen kẽ (Đầu & Cuối prompt được ưu tiên) giúp LLM không bị bỏ sót các thông tin quan trọng nằm ở giữa."
+    )
+    use_hyde = st.toggle(
+        "Kích hoạt HyDE",
+        value=False,
+        help="Dùng LLM tạo tài liệu giả định trước semantic search. Tính năng này phát sinh thêm một lượt gọi API.",
     )
     
     st.divider()
@@ -313,7 +373,7 @@ with st.sidebar:
     else:
         st.warning("Backend: Chế độ chạy thử (Sandbox Mode)")
         
-    api_key_status = "Đã cấu hình" if (os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")) else "Chưa cấu hình (Sử dụng Mockup)"
+    api_key_status = "Đã cấu hình" if llm_is_configured() else "Chưa cấu hình (Sử dụng Mockup)"
     st.info(f"API Key: {api_key_status}")
 
 # =============================================================================
@@ -324,24 +384,17 @@ st.title("📚 E-commerce Support & RAG Verification Hub")
 st.markdown("Hệ thống chatbot hỏi đáp chính sách e-commerce và hỗ trợ khách hàng tích hợp trích dẫn nguồn.")
 
 # Khung hiển thị cuộc hội thoại
-for msg in st.session_state.messages:
+last_user_query = ""
+for message_idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        if msg["role"] == "user":
+            last_user_query = str(msg.get("content", ""))
         
         # Nếu là câu trả lời của trợ lý và có tài liệu nguồn kèm theo
         if msg["role"] == "assistant" and "sources" in msg and msg["sources"]:
-            with st.expander("📚 Chi Tiết Tài Liệu & Trích Dẫn"):
-                for idx, src in enumerate(msg["sources"], 1):
-                    meta = src.get("metadata", {})
-                    title = meta.get("title") or meta.get("source") or "Tài liệu"
-                    score = src.get("score", 0.0)
-                    doc_type = meta.get("type", "unknown")
-                    year = meta.get("year", "2026")
-                    
-                    st.markdown(f"**[{idx}] {title} ({year})**")
-                    st.caption(f"Loại: `{doc_type}` | Score: `{score:.4f}` | File: `{meta.get('source', '')}`")
-                    st.text_area("Nội dung trích đoạn:", value=src.get("content", ""), height=100, key=f"hist_{hash(title)}_{idx}")
-                    st.divider()
+            source_query = str(msg.get("query") or last_user_query)
+            _render_sources(msg["sources"], source_query)
 
 # =============================================================================
 # USER INPUT HANDLING
@@ -363,7 +416,14 @@ if query:
     with st.chat_message("assistant"):
         with st.spinner("Đang tìm kiếm nguồn tài liệu và tổng hợp câu trả lời có Citation..."):
             # Chạy truy vấn
-            result = run_rag_pipeline(query, top_k=top_k, use_reordering=use_reordering)
+            result = run_rag_pipeline(
+                query,
+                top_k=top_k,
+                use_reordering=use_reordering,
+                use_hyde=use_hyde,
+                lexical_method=lexical_method,
+                conversation_history=st.session_state.messages[:-1],
+            )
             
             answer = result.get("answer", "Xin lỗi, hệ thống gặp lỗi khi truy xuất câu trả lời.")
             sources = result.get("sources", [])
@@ -374,23 +434,13 @@ if query:
             
             # Hiển thị tài liệu nguồn
             if sources:
-                with st.expander("📚 Chi Tiết Tài Liệu & Trích Dẫn", expanded=True):
-                    for idx, src in enumerate(sources, 1):
-                        meta = src.get("metadata", {})
-                        title = meta.get("title") or meta.get("source") or "Tài liệu"
-                        score = src.get("score", 0.0)
-                        doc_type = meta.get("type", "unknown")
-                        year = meta.get("year", "2026")
-                        
-                        st.markdown(f"**[{idx}] {title} ({year})**")
-                        st.caption(f"Loại: `{doc_type}` | Score: `{score:.4f}` | File: `{meta.get('source', '')}`")
-                        st.text_area("Nội dung trích đoạn:", value=src.get("content", ""), height=100, key=f"new_{hash(title)}_{idx}")
-                        st.divider()
+                _render_sources(sources, query, expanded=True)
                             
     # Lưu vào lịch sử chat
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer,
+        "query": query,
         "sources": sources,
         "reordered_sources": reordered_sources,
         "is_reordered": use_reordering
