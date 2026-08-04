@@ -170,30 +170,23 @@ def rerank_rrf(
     Returns:
         List of top_k candidates sorted by RRF score descending.
     """
-    if not ranked_lists:
-        return []
-
-    # Nếu người dùng truyền 1 danh sách candidate duy nhất thay vì list các list
-    if isinstance(ranked_lists[0], dict):
-        ranked_lists = [ranked_lists]  # type: ignore
-
-    rrf_scores: dict[str, float] = {}
-    content_map: dict[str, dict] = {}
+    rrf_scores = {}  # content -> score
+    content_map = {}  # content -> full dict
 
     for ranked_list in ranked_lists:
         for rank, item in enumerate(ranked_list, 1):
-            key = item.get("content", "")
-            rrf_scores[key] = rrf_scores.get(key, 0.0) + 1.0 / (k + rank)
+            key = item["content"]
+            rrf_scores[key] = rrf_scores.get(key, 0) + 1 / (k + rank)
             if key not in content_map:
-                content_map[key] = item.copy()
+                content_map[key] = item
 
-    # Sắp xếp theo RRF score giảm dần
+    # Sort by RRF score descending
     sorted_items = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
 
     results = []
     for content, score in sorted_items[:top_k]:
         item = content_map[content].copy()
-        item["score"] = float(score)
+        item["score"] = score
         results.append(item)
 
     return results
@@ -245,7 +238,12 @@ def rerank(
             return rerank_mmr(query_emb, flat, top_k)
         return rerank_mmr(query_emb, candidates, top_k)  # type: ignore
     elif method == "rrf":
-        return rerank_rrf(candidates, top_k=top_k)  # type: ignore
+        if not candidates:
+            return []
+        if isinstance(candidates[0], list):
+            return rerank_rrf(candidates, top_k)
+        else:
+            return rerank_rrf([candidates], top_k)
     else:
         raise ValueError(f"Unknown rerank method: {method}")
 

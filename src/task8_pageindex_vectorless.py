@@ -38,23 +38,32 @@ STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 TEMP_PDF_DIR = Path(__file__).parent.parent / "data" / "temp_pdf"
 
 
-def _md_to_pdf(md_path: Path, pdf_path: Path) -> None:
-    """Chuyển đổi file Markdown sang PDF đơn giản để upload lên PageIndex."""
-    from fpdf import FPDF
+def to_unsigned_vietnamese(text: str) -> str:
+    """Chuyển đổi tiếng Việt có dấu thành không dấu để ghi file PDF an toàn bằng fpdf2."""
+    patterns = {
+        '[àáảãạăằắẳẵặâầấẩẫậ]': 'a',
+        '[ÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬ]': 'A',
+        '[èéẻẽẹêềếểễệ]': 'e',
+        '[ÈÉẺẼẸÊỀẾỂỄỆ]': 'E',
+        '[ìíỉĩị]': 'i',
+        '[ÌÍỈĨỊ]': 'I',
+        '[òóỏõọôồốổỗộơờớởỡợ]': 'o',
+        '[ÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢ]': 'O',
+        '[ùúủũụưừứửữự]': 'u',
+        '[ÙÚỦŨỤƯỪỨỬỮỰ]': 'U',
+        '[ỳýỷỹỵ]': 'y',
+        '[ỲÝỶỸỴ]': 'Y',
+        'đ': 'd',
+        'Đ': 'D'
+    }
+    import re
+    res = text
+    for pattern, repl in patterns.items():
+        res = re.sub(pattern, repl, res)
+    return res
 
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Helvetica", size=10)
-    content = md_path.read_text(encoding="utf-8", errors="ignore")
-    # Clean non-latin1 characters for basic fpdf compatibility
-    safe_content = content.encode("latin-1", "replace").decode("latin-1")
-    for line in safe_content.splitlines():
-        pdf.multi_cell(0, 8, text=line)
-    pdf_path.parent.mkdir(parents=True, exist_ok=True)
-    pdf.output(str(pdf_path))
 
-
-def upload_documents() -> list[str]:
+def upload_documents():
     """
     Upload toàn bộ markdown documents lên PageIndex.
 
@@ -62,40 +71,42 @@ def upload_documents() -> list[str]:
         Danh sách doc_ids đã được upload thành công.
     """
     if not PAGEINDEX_API_KEY:
-        print("⚠ PAGEINDEX_API_KEY chưa được set trong .env")
-        return []
+        raise RuntimeError("PAGEINDEX_API_KEY not set")
 
-    try:
-        from pageindex import PageIndexClient
-    except ImportError:
-        print("⚠ Thư viện 'pageindex' chưa được cài đặt (pip install pageindex).")
-        return []
+    from pageindex.client import PageIndexClient
+    from fpdf import FPDF
+    import tempfile
 
     client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
-    doc_ids: list[str] = []
 
-    md_files = list(STANDARDIZED_DIR.rglob("*.md"))
-    if not md_files:
-        print(f"⚠ Không tìm thấy file markdown nào trong {STANDARDIZED_DIR}")
-        return []
+    for md_file in STANDARDIZED_DIR.rglob("*.md"):
+        # Đọc nội dung markdown
+        with open(md_file, "r", encoding="utf-8") as f:
+            content = f.read()
 
-    TEMP_PDF_DIR.mkdir(parents=True, exist_ok=True)
+        # Tạo PDF từ nội dung
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("helvetica", size=10)
+        
+        content_unsigned = to_unsigned_vietnamese(content)
+        for line in content_unsigned.splitlines():
+            clean_line = line.encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(0, 5, txt=clean_line)
 
-    for md_file in md_files:
-        pdf_path = TEMP_PDF_DIR / f"{md_file.stem}.pdf"
+        # Lưu file tạm
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            pdf_path = tmp.name
+
         try:
-            _md_to_pdf(md_file, pdf_path)
-            resp = client.submit_document(str(pdf_path))
-            doc_id = resp.get("doc_id") or resp.get("id") or resp.get("document_id")
-            if doc_id:
-                doc_ids.append(str(doc_id))
-                print(f"  ✓ Uploaded: {md_file.name} -> {doc_id}")
-            else:
-                print(f"  ⚠ Uploaded {md_file.name} nhưng không lấy được doc_id: {resp}")
-        except Exception as e:
-            print(f"  ❌ Lỗi upload {md_file.name}: {e}")
-
-    return doc_ids
+            pdf.output(pdf_path)
+            # Submit lên PageIndex
+            resp = client.submit_document(pdf_path)
+            doc_id = resp.get("doc_id") or resp.get("id")
+            print(f"  ✓ Uploaded: {md_file.name} -> {doc_id}")
+        finally:
+            if os.path.exists(pdf_path):
+                os.remove(pdf_path)
 
 
 def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
@@ -115,109 +126,74 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
             'source': 'pageindex'   # Đánh dấu nguồn retrieval
         }
     """
-    if not query or top_k <= 0:
-        return []
-
     if not PAGEINDEX_API_KEY:
-        # Khi chưa cấu hình API Key, trả về danh sách rỗng
-        return []
+        raise RuntimeError("PAGEINDEX_API_KEY not set")
 
-    try:
-        from pageindex import PageIndexClient
-    except ImportError:
-        return []
+    from pageindex.client import PageIndexClient
+    import time
 
-    try:
-        client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
+    client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
+    
+    # Lấy danh sách tài liệu trong workspace
+    docs = client.list_documents()
+    results = []
 
-        # Lấy danh sách tài liệu đã upload
-        doc_list_resp = client.list_documents()
-        documents = []
-        if isinstance(doc_list_resp, list):
-            documents = doc_list_resp
-        elif isinstance(doc_list_resp, dict):
-            documents = doc_list_resp.get("documents") or doc_list_resp.get("data") or []
-
-        if not documents:
-            # Nếu chưa có tài liệu nào trên PageIndex, thử upload
-            uploaded = upload_documents()
-            if not uploaded:
-                return []
-            doc_id = uploaded[0]
+    for doc in docs:
+        if isinstance(doc, dict):
+            doc_id = doc.get("id") or doc.get("doc_id")
+            filename = doc.get("filename") or doc.get("name") or "unknown"
         else:
-            first_doc = documents[0]
-            doc_id = first_doc.get("id") or first_doc.get("doc_id") or first_doc.get("document_id")
+            doc_id = getattr(doc, "id", None) or getattr(doc, "doc_id", None)
+            filename = getattr(doc, "filename", None) or getattr(doc, "name", "unknown")
 
         if not doc_id:
-            return []
+            continue
 
-        # Gửi query
-        query_resp = client.submit_query(doc_id=str(doc_id), query=query)
-        retrieval_id = query_resp.get("retrieval_id") or query_resp.get("id")
+        # Đảm bảo document sẵn sàng để query
+        if not client.is_retrieval_ready(doc_id):
+            continue
 
+        resp = client.submit_query(doc_id=doc_id, query=query)
+        retrieval_id = resp.get("retrieval_id") or resp.get("id")
         if not retrieval_id:
-            return []
+            continue
 
-        # Poll cho đến khi status == "completed"
-        max_retries = 30
-        retrieval: dict[str, Any] = {}
-        for _ in range(max_retries):
-            retrieval = client.get_retrieval(str(retrieval_id))
-            status = retrieval.get("status")
-            if status == "completed":
-                break
-            elif status == "failed":
-                print(f"⚠ PageIndex retrieval failed: {retrieval}")
-                return []
-            time.sleep(1)
+        # Poll cho đến khi status == "completed" hoặc "failed"
+        retrieval = client.get_retrieval(retrieval_id)
+        while retrieval.get("status") not in ("completed", "failed"):
+            time.sleep(0.5)
+            retrieval = client.get_retrieval(retrieval_id)
 
-        retrieved_nodes = retrieval.get("retrieved_nodes") or []
-        results: list[dict] = []
-        score_counter = 1.0
+        if retrieval.get("status") == "failed":
+            continue
 
-        for node in retrieved_nodes:
-            relevant_contents = node.get("relevant_contents") or []
-            for group in relevant_contents:
-                if isinstance(group, list):
-                    for item in group:
-                        if isinstance(item, dict):
-                            content = item.get("relevant_content") or item.get("text") or ""
-                            section = item.get("section_title") or node.get("title") or ""
-                            if content:
-                                results.append(
-                                    {
-                                        "content": content,
-                                        "score": score_counter,
-                                        "metadata": {
-                                            "section": section,
-                                            "node_id": node.get("id"),
-                                        },
-                                        "source": "pageindex",
-                                    }
-                                )
-                                score_counter = max(0.1, score_counter - 0.05)
-                elif isinstance(group, dict):
-                    content = group.get("relevant_content") or group.get("text") or ""
-                    section = group.get("section_title") or node.get("title") or ""
-                    if content:
-                        results.append(
-                            {
-                                "content": content,
-                                "score": score_counter,
-                                "metadata": {
-                                    "section": section,
-                                    "node_id": node.get("id"),
-                                },
-                                "source": "pageindex",
-                            }
-                        )
-                        score_counter = max(0.1, score_counter - 0.05)
+        # Parse retrieved_nodes
+        for node in retrieval.get("retrieved_nodes", [])[:2]:
+            for group in node.get("relevant_contents", []):
+                for item in group:
+                    results.append({
+                        "content": item.get("relevant_content", ""),
+                        "score": 0.5,
+                        "metadata": {
+                            "section": item.get("section_title"),
+                            "source": filename
+                        },
+                        "source": "pageindex",
+                    })
 
-        return results[:top_k]
+    # Lọc trùng và gán lại score giảm dần
+    seen_content = set()
+    unique_results = []
+    for item in results:
+        content = item["content"]
+        if content not in seen_content:
+            seen_content.add(content)
+            unique_results.append(item)
 
-    except Exception as e:
-        print(f"⚠ PageIndex search error: {e}")
-        return []
+    for idx, item in enumerate(unique_results):
+        item["score"] = 1.0 - (idx * 0.1)
+
+    return unique_results[:top_k]
 
 
 if __name__ == "__main__":
